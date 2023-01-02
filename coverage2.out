@@ -10,7 +10,7 @@ primeapp/main.go:64.2,66.19 2 0
 primeapp/main.go:54.44,56.3 1 0
 primeapp/main.go:60.16,62.3 1 0
 primeapp/main.go:69.14,74.2 4 0
-primeapp/main.go:76.15,78.2 1 1
+primeapp/main.go:76.15,78.2 1 0
 primeapp/main.go:80.36,82.22 1 1
 primeapp/main.go:87.2,87.11 1 1
 primeapp/main.go:92.2,92.28 1 1
