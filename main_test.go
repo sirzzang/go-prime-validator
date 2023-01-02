@@ -12,8 +12,9 @@ func Test_isPrime(t *testing.T) {
 	}{
 		{"prime", 7, true, "7 is a prime number!"},
 		{"no prime", 1, false, "1 is not prime, by definition!"},
-		{"prime", 8, false, "8 is not a prime number, because it is divisible by 2!"},
-		{"prime", -3, false, "Negative numbers are not prime, by definition!"},
+		{"no prime", 8, false, "8 is not a prime number, because it is divisible by 2!"},
+		{"no prime", -3, false, "Negative numbers are not prime, by definition!"},
+		{"no prime", 0, false, "0 is not prime, by definition!"},
 	}
 
 	for _, e := range primeTests {
