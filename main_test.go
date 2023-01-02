@@ -2,13 +2,14 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"io"
 	"os"
 	"strings"
 	"testing"
 )
 
-func Test_IsPrime(t *testing.T) {
+func Test_isPrime(t *testing.T) {
 
 	primeTests := []struct {
 		name     string
@@ -41,7 +42,7 @@ func Test_IsPrime(t *testing.T) {
 
 }
 
-func Test_Prompt(t *testing.T) {
+func Test_prompt(t *testing.T) {
 
 	// save a copy of os.Stdout
 	oldOut := os.Stdout
@@ -70,7 +71,7 @@ func Test_Prompt(t *testing.T) {
 
 }
 
-func Test_Intro(t *testing.T) {
+func Test_intro(t *testing.T) {
 
 	// save a copy of os.Stdout
 	oldOut := os.Stdout
@@ -99,7 +100,7 @@ func Test_Intro(t *testing.T) {
 
 }
 
-func Test_CheckNumbers(t *testing.T) {
+func Test_checkNumbers(t *testing.T) {
 
 	tests := []struct {
 		name     string
@@ -127,5 +128,20 @@ func Test_CheckNumbers(t *testing.T) {
 			t.Errorf("%s: expected: %s, but got: %s", e.name, e.expected, res)
 		}
 	}
+
+}
+
+func Test_readUserInput(t *testing.T) {
+
+	// a channel and an instance of an io.Reader required
+	doneChan := make(chan bool)
+
+	// create a reference to a bytes.Buffer
+	var stdin bytes.Buffer
+	stdin.Write([]byte("1\nq\n"))
+
+	go readUserInput(&stdin, doneChan)
+	<-doneChan
+	close(doneChan)
 
 }
