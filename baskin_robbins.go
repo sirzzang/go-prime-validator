@@ -12,17 +12,25 @@ import (
 var cnt int = 0
 var lastNum int = 0
 
-func main() {
+var baskinRobbinsDescription = `Enter one or more than one numbers.
+Leave a space between numbers when entering two or more numbers.
+All players' input numbers should be successive.
+`
+
+func BaskinRobbins(quitChan chan bool) {
 
 	intro()
 
 	doneChan := make(chan bool)
 	go readUserInput(os.Stdin, doneChan)
-
 	<-doneChan
+	close(doneChan)
 
-	fmt.Println("Goodbye.")
+	// say goodbye
+	fmt.Println("Going back to main.")
 	fmt.Println("Total cnt:", cnt)
+	quitChan <- true
+	close(quitChan)
 
 }
 
@@ -67,7 +75,7 @@ func checkNumbers(scanner *bufio.Scanner) (string, bool) {
 	for i, num := range nums {
 		if num != lastNum+i+1 {
 			fmt.Printf("Please make sure you enter %d in a right place.\n", lastNum+i+1)
-		return "", false
+			return "", false
 		}
 	}
 
@@ -110,14 +118,6 @@ func stringToNumbers(line string) ([]int, error) {
 }
 
 func intro() {
-	fmt.Println("Baskin Robbins 31")
-	fmt.Println("------------")
-	fmt.Println("Enter one or more than one numbers.")
-	fmt.Println("Leave a space between numbers when entering two or more numbers.")
-	fmt.Println("All players' input numbers should be successive.")
+	fmt.Println(baskinRobbinsDescription)
 	prompt()
-}
-
-func prompt() {
-	fmt.Print("-> ")
 }

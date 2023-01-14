@@ -9,93 +9,123 @@ import (
 	"strings"
 )
 
-func main() {
-
-	// print a welcome message
-	intro()
-
-	// create a channel to indicate when the user wants to quit
-	doneChan := make(chan bool)
-
-	// start a goroutine to read user input and run program
-	go readUserInput(os.Stdin, doneChan)
-
-	// block until the doneChan gets a value
-	<-doneChan
-
-	// close the channel
-	close(doneChan)
-
-	// say goodbye
-	fmt.Println("Goodbye.")
-
+type GameInfo struct {
+	name        string
+	description string
+	game        func(chan bool)
 }
 
-func readUserInput(in io.Reader, doneChan chan bool) {
-	scanner := bufio.NewScanner(in)
+var games map[int]GameInfo = map[int]GameInfo{
 
+	1: {
+		"Prime Validator",
+		"Is it a prime number?",
+		PrimeValidator,
+	},
+	2: {
+		"Baskin Robbins 31",
+		"The one who first enters 31 will lose.",
+		BaskinRobbins,
+	},
+}
+
+func main() {
+
+	// print a language selection message
+	selectLanguage()
+
+	// print a welcome message
+	greetings()
+
+	// let user select a game
 	for {
-		res, done := checkNumbers(scanner)
 
-		if done {
-			doneChan <- true
+		introMain()
+
+		game, quit := selectGame()
+
+		if quit {
+			fmt.Println("Bye.")
 			return
 		}
 
-		fmt.Println(res)
-		prompt()
+		if game != nil {
+			quitChan := make(chan bool)
+			go game(quitChan)
+			<-quitChan
+		}
+
+	}
+
+}
+
+func selectGame() (func(chan bool), bool) {
+
+	inputChan := make(chan string)
+	doneChan := make(chan bool)
+
+	prompt()
+	go readUserInputMain(os.Stdin, inputChan, doneChan)
+
+	select {
+
+	case <-doneChan:
+		// fmt.Println("Bye.")
+		return nil, true
+
+	case input := <-inputChan:
+
+		k, err := strconv.Atoi(input)
+		if err != nil {
+			fmt.Println("Please enter a valid number.")
+			return nil, false
+		}
+
+		v, ok := games[k]
+		if !ok {
+			fmt.Println("Please enter a number in a game list.")
+			return nil, false
+		}
+
+		fmt.Printf("Starting %s\n", v.name)
+		return v.game, false
 	}
 }
 
-func checkNumbers(scanner *bufio.Scanner) (string, bool) {
-	// read user input
+func selectLanguage() {
+	fmt.Println("Choose a Language. 언어를 선택하세요.")
+}
+
+func greetings() {
+	fmt.Println("Welcome to Time Killer!")
+	fmt.Println("Remember you can quit whenever you enter Q(q), or ctrl + c.")
+}
+
+func introMain() {
+	fmt.Println("Please choose a game in a game list below.")
+	fmt.Println("------------")
+	for k, v := range games {
+		fmt.Printf("%d: %s\n", k, v.name)
+	}
+	fmt.Println("------------")
+}
+
+func readUserInputMain(in io.Reader, inputChan chan string, doneChan chan bool) {
+
+	scanner := bufio.NewScanner(in)
 	scanner.Scan()
 
-	// check to see if the user wants to quit
 	if strings.EqualFold(scanner.Text(), "q") {
-		return "", true
+		doneChan <- true
+		close(doneChan)
+		return
 	}
 
-	// try to convert what the user typed into an int
-	numToCheck, err := strconv.Atoi(scanner.Text())
-	if err != nil {
-		return "Please enter a whole number!", false
-	}
+	inputChan <- scanner.Text()
+	close(inputChan)
 
-	_, msg := isPrime(numToCheck)
-
-	return msg, false
-}
-
-func intro() {
-	fmt.Println("Is it Prime?")
-	fmt.Println("------------")
-	fmt.Println("Enter a whole number, and we'll tell you if it is a prime number or not. Enter q to quit.")
-	prompt()
 }
 
 func prompt() {
 	fmt.Print("-> ")
-}
-
-func isPrime(n int) (bool, string) {
-	// 0 and 1 is not prime by definition
-	if n == 0 || n == 1 {
-		return false, fmt.Sprintf("%d is not prime, by definition!", n)
-	}
-
-	// negative numbers are not prime
-	if n < 0 {
-		return false, "Negative numbers are not prime, by definition!"
-	}
-
-	// use the modulus operator repeatedly to see if we have a prime number
-	for i := 2; i <= n/2; i++ {
-		if n%i == 0 {
-			return false, fmt.Sprintf("%d is not a prime number, because it is divisible by %d!", n, i)
-		}
-	}
-
-	return true, fmt.Sprintf("%d is a prime number!", n)
-
 }
