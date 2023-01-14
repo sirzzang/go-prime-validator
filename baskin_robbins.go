@@ -64,10 +64,11 @@ func checkNumbers(scanner *bufio.Scanner) (string, bool) {
 	}
 
 	// TODO: check if numbers are in ascending order and successive
-
-	if nums[0] <= lastNum || nums[0] > lastNum+1 {
-		fmt.Printf("Please make sure your first number is %d", lastNum+1)
+	for i, num := range nums {
+		if num != lastNum+i+1 {
+			fmt.Printf("Please make sure you enter %d in a right place.\n", lastNum+i+1)
 		return "", false
+		}
 	}
 
 	msg, done := doGame(nums)
@@ -99,10 +100,7 @@ func stringToNumbers(line string) ([]int, error) {
 
 	for _, v := range strings.Fields(line) {
 		i, err := strconv.Atoi(v)
-		if err != nil {
-			return nil, fmt.Errorf("Please enter integers.")
-		}
-		if i < 1 {
+		if err != nil || i < 1 {
 			return nil, fmt.Errorf("Please enter positive integers.")
 		}
 
